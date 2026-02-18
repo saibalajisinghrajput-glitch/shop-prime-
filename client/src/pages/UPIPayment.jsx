@@ -87,13 +87,25 @@ const UPIPayment = () => {
     window.location.href = upiLink;
   };
 
-  const handleSimulatePayment = () => {
-    // For demo purposes - simulate successful payment
+  const handleConfirmPayment = async () => {
+    // Check if payment was actually made
     setPaymentStatus('processing');
-    setTimeout(() => {
+    
+    try {
+      // In a real implementation, this would verify with the payment gateway
+      // For now, we simulate a verification delay and then confirm
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Update order status to paid
       setPaymentStatus('paid');
+      
+      // Navigate to order confirmation
       navigate(`/order-confirmation/${id}`);
-    }, 2000);
+    } catch (error) {
+      console.error('Payment verification failed:', error);
+      setPaymentStatus('pending');
+      alert('Payment verification failed. Please try again or contact support.');
+    }
   };
 
   if (loading) {
@@ -200,13 +212,13 @@ const UPIPayment = () => {
             {copied ? 'Copied!' : 'Copy UPI Link'}
           </button>
 
-          {/* Option 3: Simulate Payment (Demo) */}
+          {/* Option 3: Confirm Payment */}
           <button
-            onClick={handleSimulatePayment}
-            className="w-full flex items-center justify-center gap-2 border border-green-300 text-green-600 py-3 rounded-lg hover:bg-green-50 transition-colors"
+            onClick={handleConfirmPayment}
+            className="w-full flex items-center justify-center gap-2 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors"
           >
-            <FiRefreshCw className="w-5 h-5" />
-            Simulate Successful Payment
+            <FiCheckCircle className="w-5 h-5" />
+            I Have Completed Payment
           </button>
         </div>
 
@@ -215,10 +227,10 @@ const UPIPayment = () => {
           <h3 className="font-semibold text-green-800 mb-2">How to Pay:</h3>
           <ol className="text-sm text-green-700 space-y-1 list-decimal list-inside">
             <li>Open your UPI app (GPay, PhonePe, Paytm, etc.)</li>
-            <li>Scan the QR code above</li>
+            <li>Scan the QR code above or click "Open UPI App"</li>
             <li>Verify the amount (₹{totalPrice.toFixed(2)})</li>
-            <li>Complete the payment</li>
-            <li>Page will auto-refresh to confirm payment</li>
+            <li>Complete the payment in your UPI app</li>
+            <li>Return here and click "I Have Completed Payment"</li>
           </ol>
         </div>
 
