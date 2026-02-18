@@ -1,3 +1,4 @@
+
 import axios from 'axios';
 import { products, categories } from '../data/mockData';
 
@@ -9,15 +10,18 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 // Auth APIs (Mock)
 export const login = async (email, password) => {
   await delay(500);
+  // Extract name from email (e.g., john@example.com -> John)
+  const nameFromEmail = email ? email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'User';
+  
   return {
     data: {
       user: {
-        _id: 'mock-user-id',
-        name: 'Demo User',
+        _id: 'mock-user-id-' + Date.now(),
+        name: nameFromEmail,
         email: email,
         isAdmin: false
       },
-      token: 'mock-jwt-token'
+      token: 'mock-jwt-token-' + Date.now()
     }
   };
 };
