@@ -257,3 +257,37 @@ export const createReview = async (productId, reviewData) => {
 
 const api = axios.create(); // Create dummy axios instance if needed elsewhere
 export default api;
+
+// Payment APIs
+export const getRazorpayKey = async () => {
+  await delay(200);
+  return {
+    data: {
+      key_id: 'rzp_test_key' // In production, fetch from backend
+    }
+  };
+};
+
+export const createRazorpayOrder = async (orderId, amount) => {
+  await delay(500);
+  return {
+    data: {
+      success: true,
+      order: {
+        id: 'order_' + Date.now(),
+        amount: amount * 100,
+        currency: 'INR'
+      }
+    }
+  };
+};
+
+export const verifyRazorpayPayment = async (paymentData) => {
+  await delay(500);
+  return {
+    data: {
+      success: true,
+      message: 'Payment verified'
+    }
+  };
+};

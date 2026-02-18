@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useLocation, useNavigate, Link } from 'react-router-dom';
-import { FiSmartphone, FiCheckCircle, FiCopy, FiExternalLink, FiRefreshCw, FiCreditCard } from 'react-icons/fi';
-import { getOrder } from '../api';
+import { FiCreditCard, FiCheckCircle, FiArrowLeft } from 'react-icons/fi';
+import { getOrder, getRazorpayKey, createRazorpayOrder, verifyRazorpayPayment } from '../api';
 
 const UPIPayment = () => {
   const { id } = useParams();
@@ -11,55 +11,12 @@ const UPIPayment = () => {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [paymentStatus, setPaymentStatus] = useState('pending');
-  const [copied, setCopied] = useState(false);
   
-  // Get UPI details from location state or use defaults
-  const upiId = location.state?.upiId || 'shopprime@upi';
   const totalPrice = location.state?.totalPrice || 0;
 
-  // Generate UPI deep link - customer pays to merchant's UPI ID
-  const generateUPILink = () => {
-    // Merchant's UPI ID (where payments will be received)
-    const merchantUpiId = 'saibalajisinghrajput@oksbi';
-    const amount = totalPrice.toFixed(2);
-    const note = `Order #${id?.slice(-6)}`;
-    
-    // UPI deep link format
-    const upiLink = `upi://pay?pa=${merchantUpiId}&pn=ShopPrime%20Payment&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
-    return upiLink;
-  };
-
-  // Generate QR code URL using GoQR API
-  const generateQRCodeUrl = () => {
-    const upiLink = encodeURIComponent(generateUPILink());
-    return `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${upiLink}&bgcolor=ffffff&color=000000`;
-  };
-
-  // Auto-refresh to check for payment status
   useEffect(() => {
     fetchOrder();
-    
-    // Poll for payment status every 3 seconds
-    const interval = setInterval(() => {
-      if (paymentStatus === 'pending') {
-        checkPaymentStatus();
-      }
-    }, 3000);
-    
-    return () => clearInterval(interval);
-  }, [id, paymentStatus]);
-
-  const checkPaymentStatus = async () => {
-    try {
-      const { data } = await getOrder(id);
-      if (data.order?.paymentInfo?.status === 'paid') {
-        setPaymentStatus('paid');
-        navigate(`/order-confirmation/${id}`);
-      }
-    } catch (error) {
-      console.error('Error checking payment status:', error);
-    }
-  };
+  }, [id]);
 
   const fetchOrder = async () => {
     try {
@@ -75,36 +32,65 @@ const UPIPayment = () => {
     }
   };
 
-  const handleCopyUPI = () => {
-    const upiLink = generateUPILink();
-    navigator.clipboard.writeText(upiLink);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleOpenUPIApp = () => {
-    const upiLink = generateUPILink();
-    window.location.href = upiLink;
-  };
-
-  const handleConfirmPayment = async () => {
-    // Check if payment was actually made
-    setPaymentStatus('processing');
-    
+  const handleRazorpayPayment = async () => {
     try {
-      // In a real implementation, this would verify with the payment gateway
-      // For now, we simulate a verification delay and then confirm
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      setPaymentStatus('processing');
       
-      // Update order status to paid
-      setPaymentStatus('paid');
+      // Get Razorpay key
+      const { data: keyData } = await getRazorpayKey();
       
-      // Navigate to order confirmation
-      navigate(`/order-confirmation/${id}`);
+      // Create order on backend
+      const { data: orderData } = await createRazorpayOrder(id, totalPrice);
+      
+      // Initialize Razorpay checkout
+      const options = {
+        key: keyData.key_id,
+        amount: orderData.order.amount,
+        currency: 'INR',
+        name: 'ShopPrime',
+        description: `Order #${id?.slice(-6)}`,
+        order_id: orderData.order.id,
+        handler: async function (response) {
+          // Verify payment
+          try {
+            await verifyRazorpayPayment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              orderId: id,
+            });
+            
+            setPaymentStatus('paid');
+            navigate(`/order-confirmation/${id}`);
+          } catch (error) {
+            console.error('Payment verification failed:', error);
+            setPaymentStatus('failed');
+          }
+        },
+        prefill: {
+          name: order?.shippingInfo?.firstName + ' ' + order?.shippingInfo?.lastName,
+          email: order?.shippingInfo?.email,
+          contact: order?.shippingInfo?.phone,
+        },
+        notes: {
+          orderId: id,
+        },
+        theme: {
+          color: '#10B981',
+        },
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+      
+      razorpay.on('payment.failed', function (response) {
+        console.error('Payment failed:', response.error);
+        setPaymentStatus('failed');
+      });
+      
     } catch (error) {
-      console.error('Payment verification failed:', error);
-      setPaymentStatus('pending');
-      alert('Payment verification failed. Please try again or contact support.');
+      console.error('Error initiating payment:', error);
+      setPaymentStatus('failed');
     }
   };
 
@@ -116,28 +102,18 @@ const UPIPayment = () => {
     );
   }
 
-  if (paymentStatus === 'paid' || paymentStatus === 'processing') {
+  if (paymentStatus === 'paid') {
     return (
       <div className="min-h-screen bg-gray-50 py-12">
         <div className="max-w-md mx-auto px-4 text-center">
-          {paymentStatus === 'processing' ? (
-            <>
-              <div className="animate-spin rounded-full h-20 w-20 border-4 border-primary-500 border-t-transparent mx-auto mb-4"></div>
-              <h1 className="text-2xl font-bold mb-2">Processing Payment...</h1>
-              <p className="text-gray-600">Please wait while we confirm your payment.</p>
-            </>
-          ) : (
-            <>
-              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <FiCheckCircle className="w-10 h-10 text-green-600" />
-              </div>
-              <h1 className="text-2xl font-bold mb-2">Payment Successful!</h1>
-              <p className="text-gray-600 mb-6">Your payment has been processed successfully.</p>
-              <Link to={`/order-confirmation/${id}`} className="btn-primary px-6 py-3 inline-block">
-                View Order Details
-              </Link>
-            </>
-          )}
+          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <FiCheckCircle className="w-10 h-10 text-green-600" />
+          </div>
+          <h1 className="text-2xl font-bold mb-2">Payment Successful!</h1>
+          <p className="text-gray-600 mb-6">Your payment has been processed successfully.</p>
+          <Link to={`/order-confirmation/${id}`} className="btn-primary px-6 py-3 inline-block">
+            View Order Details
+          </Link>
         </div>
       </div>
     );
@@ -146,13 +122,18 @@ const UPIPayment = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-lg mx-auto px-4">
+        {/* Back button */}
+        <Link to="/checkout" className="flex items-center gap-2 text-gray-600 mb-6 hover:text-gray-900">
+          <FiArrowLeft /> Back to Checkout
+        </Link>
+
         {/* Header */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <FiCreditCard className="w-8 h-8 text-green-600" />
           </div>
-          <h1 className="text-2xl font-bold">Scan & Pay</h1>
-          <p className="text-gray-600 mt-2">Scan the QR code with any UPI app to pay</p>
+          <h1 className="text-2xl font-bold">Complete Your Payment</h1>
+          <p className="text-gray-600 mt-2">Secure payment powered by Razorpay</p>
         </div>
 
         {/* Payment Details Card */}
@@ -161,84 +142,42 @@ const UPIPayment = () => {
             <span className="text-gray-600">Order ID</span>
             <span className="font-medium">#{id?.slice(-6)}</span>
           </div>
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center">
             <span className="text-gray-600">Amount to Pay</span>
             <span className="text-2xl font-bold text-green-600">₹{totalPrice.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between items-center">
-            <span className="text-gray-600">Pay To</span>
-            <span className="font-medium text-sm">saibalajisinghrajput@oksbi</span>
-          </div>
         </div>
 
-        {/* QR Code Section */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6 text-center">
-          <h2 className="text-lg font-semibold mb-4">Scan this QR Code</h2>
+        {/* Payment Button */}
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          {paymentStatus === 'failed' && (
+            <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-4">
+              Payment failed. Please try again.
+            </div>
+          )}
           
-          <div className="relative inline-block">
-            <img 
-              src={generateQRCodeUrl()} 
-              alt="UPI QR Code" 
-              className="w-64 h-64 mx-auto border-2 border-gray-200 rounded-lg"
-            />
-            {/* Scanning animation overlay */}
-            <div className="absolute inset-0 border-2 border-green-500 rounded-lg animate-pulse opacity-50"></div>
-          </div>
+          <button
+            onClick={handleRazorpayPayment}
+            disabled={paymentStatus === 'processing'}
+            className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {paymentStatus === 'processing' ? 'Processing...' : `Pay ₹${totalPrice.toFixed(2)}`}
+          </button>
           
-          <p className="text-sm text-gray-500 mt-4">
-            Open any UPI app (Google Pay, PhonePe, Paytm, BHIM) and scan this QR code
+          <p className="text-center text-sm text-gray-500 mt-4">
+            Click the button above to open Razorpay secure checkout
           </p>
         </div>
 
-        {/* Payment Options */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-lg font-semibold mb-4">Or Pay Using</h2>
-          
-          {/* Option 1: Open UPI App */}
-          <button
-            onClick={handleOpenUPIApp}
-            className="w-full flex items-center justify-center gap-2 bg-primary-600 text-white py-3 rounded-lg mb-4 hover:bg-primary-700 transition-colors"
-          >
-            <FiExternalLink className="w-5 h-5" />
-            Open UPI App
-          </button>
-
-          {/* Option 2: Copy UPI Link */}
-          <button
-            onClick={handleCopyUPI}
-            className="w-full flex items-center justify-center gap-2 border border-gray-300 py-3 rounded-lg mb-4 hover:bg-gray-50 transition-colors"
-          >
-            <FiCopy className="w-5 h-5" />
-            {copied ? 'Copied!' : 'Copy UPI Link'}
-          </button>
-
-          {/* Option 3: Confirm Payment */}
-          <button
-            onClick={handleConfirmPayment}
-            className="w-full flex items-center justify-center gap-2 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors"
-          >
-            <FiCheckCircle className="w-5 h-5" />
-            I Have Completed Payment
-          </button>
-        </div>
-
-        {/* Instructions */}
-        <div className="mt-6 bg-green-50 rounded-lg p-4">
-          <h3 className="font-semibold text-green-800 mb-2">How to Pay:</h3>
-          <ol className="text-sm text-green-700 space-y-1 list-decimal list-inside">
-            <li>Open your UPI app (GPay, PhonePe, Paytm, etc.)</li>
-            <li>Scan the QR code above or click "Open UPI App"</li>
-            <li>Verify the amount (₹{totalPrice.toFixed(2)})</li>
-            <li>Complete the payment in your UPI app</li>
-            <li>Return here and click "I Have Completed Payment"</li>
-          </ol>
-        </div>
-
-        {/* Cancel Link */}
-        <div className="mt-6 text-center">
-          <Link to="/checkout" className="text-gray-500 hover:text-gray-700">
-            Cancel and go back
-          </Link>
+        {/* Security Note */}
+        <div className="mt-6 bg-blue-50 rounded-lg p-4">
+          <h3 className="font-semibold text-blue-800 mb-2">Secure Payment</h3>
+          <ul className="text-sm text-blue-700 space-y-1 list-disc list-inside">
+            <li>256-bit SSL encryption</li>
+            <li>PCI DSS compliant</li>
+            <li>All major UPI apps supported</li>
+            <li>Cards, Net Banking & Wallet options</li>
+          </ul>
         </div>
       </div>
     </div>
@@ -246,4 +185,3 @@ const UPIPayment = () => {
 };
 
 export default UPIPayment;
-
