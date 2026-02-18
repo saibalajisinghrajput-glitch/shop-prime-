@@ -12,7 +12,6 @@ const UPIPayment = () => {
   const [loading, setLoading] = useState(true);
   const [paymentStatus, setPaymentStatus] = useState('pending');
   const [copied, setCopied] = useState(false);
-  const [scanCount, setScanCount] = useState(0);
   
   // Get UPI details from location state or use defaults
   const upiId = location.state?.upiId || 'shopprime@upi';
@@ -97,14 +96,6 @@ const UPIPayment = () => {
     }, 2000);
   };
 
-  const handleQRScanned = () => {
-    setScanCount(prev => prev + 1);
-    // Auto-trigger payment simulation when QR is "scanned"
-    if (scanCount === 0) {
-      handleSimulatePayment();
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -177,7 +168,6 @@ const UPIPayment = () => {
               src={generateQRCodeUrl()} 
               alt="UPI QR Code" 
               className="w-64 h-64 mx-auto border-2 border-gray-200 rounded-lg"
-              onLoad={handleQRScanned}
             />
             {/* Scanning animation overlay */}
             <div className="absolute inset-0 border-2 border-green-500 rounded-lg animate-pulse opacity-50"></div>
