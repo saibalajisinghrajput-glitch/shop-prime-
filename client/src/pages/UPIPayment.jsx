@@ -34,8 +34,9 @@ const UPIPayment = () => {
   };
 
   const handlePayment = () => {
-    // Open Razorpay.me payment link
-    window.open('https://razorpay.me/@Shopprime', '_blank');
+    // Open Razorpay.me payment link with amount pre-filled
+    const amountInRupees = totalPrice.toFixed(2);
+    window.open(`https://razorpay.me/@Shopprime?amount=${amountInRupees}`, '_blank');
   };
 
   const handleConfirmPayment = () => {
@@ -107,13 +108,14 @@ const UPIPayment = () => {
           <div className="bg-white rounded-lg p-4 mb-4 text-center border border-gray-200">
             <p className="text-sm text-gray-600 mb-2">Your Payment Link:</p>
             <a 
-              href="https://razorpay.me/@Shopprime" 
+              href={`https://razorpay.me/@Shopprime?amount=${totalPrice.toFixed(2)}`}
               target="_blank" 
               rel="noopener noreferrer"
               className="text-green-600 font-bold text-lg hover:underline break-all"
             >
               razorpay.me/@Shopprime
             </a>
+            <p className="text-xs text-gray-500 mt-2">Amount will be pre-filled</p>
           </div>
 
           <ol className="text-sm text-gray-700 space-y-3 list-decimal list-inside bg-white rounded-lg p-4">
@@ -127,15 +129,15 @@ const UPIPayment = () => {
         {/* Pay Now Button */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <a
-            href="https://razorpay.me/@Shopprime"
+            href={`https://razorpay.me/@Shopprime?amount=${totalPrice.toFixed(2)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold hover:bg-green-700 transition-colors flex items-center justify-center gap-2 block text-center"
           >
-            Pay Now on Razorpay.me <FiExternalLink />
+            Pay ₹{totalPrice.toFixed(2)} on Razorpay.me <FiExternalLink />
           </a>
           <p className="text-center text-sm text-gray-500 mt-4">
-            Opens your Razorpay payment page
+            Amount will be automatically filled
           </p>
         </div>
 
