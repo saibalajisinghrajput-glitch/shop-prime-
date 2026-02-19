@@ -100,9 +100,37 @@ const UPIPayment = () => {
           </div>
         </div>
 
-        {/* Razorpay.me Link - Prominent Display */}
+        {/* QR Code Payment - For Desktop Users */}
+        <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg shadow-sm p-6 mb-6 border-2 border-purple-200">
+          <h3 className="font-bold text-gray-800 mb-4 text-center text-lg">Scan QR Code to Pay</h3>
+          
+          <div className="bg-white rounded-lg p-4 mb-4 text-center border border-gray-200">
+            <p className="text-sm text-gray-600 mb-3">Scan with any UPI app (PhonePe, GPay, Paytm)</p>
+            <img 
+              src="/qrcode.jpeg" 
+              alt="Payment QR Code" 
+              className="w-48 h-48 mx-auto object-contain border-2 border-gray-200 rounded-lg"
+            />
+            <p className="text-xs text-gray-500 mt-2">QR Code for ₹{totalPrice.toFixed(2)}</p>
+          </div>
+
+          <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4 mb-4">
+            <p className="text-center text-sm text-gray-700 mb-2">Amount to Pay:</p>
+            <p className="text-center text-3xl font-bold text-green-600">₹{totalPrice.toFixed(2)}</p>
+          </div>
+
+          <ol className="text-sm text-gray-700 space-y-3 list-decimal list-inside bg-white rounded-lg p-4">
+            <li>Open your UPI app (PhonePe, GPay, Paytm, etc.)</li>
+            <li>Scan the QR code above</li>
+            <li>Verify the amount: <strong>₹{totalPrice.toFixed(2)}</strong></li>
+            <li>Complete the payment</li>
+            <li>Return here and click "I've Paid" below</li>
+          </ol>
+        </div>
+
+        {/* Razorpay.me Link - For Mobile Users */}
         <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg shadow-sm p-6 mb-6 border-2 border-green-200">
-          <h3 className="font-bold text-gray-800 mb-4 text-center text-lg">Pay via Razorpay</h3>
+          <h3 className="font-bold text-gray-800 mb-4 text-center text-lg">Or Pay via Razorpay Link</h3>
           
           <div className="bg-white rounded-lg p-4 mb-4 text-center border border-gray-200">
             <p className="text-sm text-gray-600 mb-2">Your Payment Link:</p>
@@ -117,14 +145,14 @@ const UPIPayment = () => {
           </div>
 
           <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4 mb-4">
-            <p className="text-center text-sm text-gray-700 mb-2">Enter this exact amount on Razorpay:</p>
+            <p className="text-center text-sm text-gray-700 mb-2">Enter this exact amount:</p>
             <p className="text-center text-3xl font-bold text-green-600">₹{totalPrice.toFixed(2)}</p>
           </div>
 
           <ol className="text-sm text-gray-700 space-y-3 list-decimal list-inside bg-white rounded-lg p-4">
-            <li>Click the link above or the "Pay Now" button</li>
-            <li>Enter the amount shown above on Razorpay.me</li>
-            <li>Complete payment using UPI, Card, or Net Banking</li>
+            <li>Click the link above on your mobile</li>
+            <li>Enter the amount shown above</li>
+            <li>Complete payment using UPI/Card/Net Banking</li>
             <li>Return here and click "I've Paid" below</li>
           </ol>
         </div>
