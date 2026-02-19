@@ -263,7 +263,7 @@ export const getRazorpayKey = async () => {
   await delay(200);
   return {
     data: {
-      key_id: 'rzp_test_key' // In production, fetch from backend
+      key_id: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_key'
     }
   };
 };

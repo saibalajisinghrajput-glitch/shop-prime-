@@ -13,9 +13,12 @@
 |------|-------|-------------|
 | `RAZORPAY_KEY_ID` | `rzp_live_SHrEMkovoCPgzC` | Production |
 | `RAZORPAY_KEY_SECRET` | `DHV5FyQU5o7tW4qGU3K0dUqt` | Production |
+| `VITE_RAZORPAY_KEY_ID` | `rzp_live_SHrEMkovoCPgzC` | Production |
 | `MONGODB_URI` | Your MongoDB connection string | Production |
 | `JWT_SECRET` | Your JWT secret key | Production |
 | `NODE_ENV` | `production` | Production |
+
+**Note:** `VITE_RAZORPAY_KEY_ID` is the client-side key (safe to expose, starts with `rzp_live_` or `rzp_test_`). `RAZORPAY_KEY_SECRET` stays server-side only.
 
 5. Click **Save**
 6. Redeploy the project (Vercel will automatically redeploy with new variables)
