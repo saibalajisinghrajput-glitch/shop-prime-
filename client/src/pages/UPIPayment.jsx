@@ -34,9 +34,8 @@ const UPIPayment = () => {
   };
 
   const handlePayment = () => {
-    // Open Razorpay.me payment link with amount pre-filled
-    const amountInRupees = totalPrice.toFixed(2);
-    window.open(`https://razorpay.me/@Shopprime?amount=${amountInRupees}`, '_blank');
+    // Open Razorpay.me payment link
+    window.open('https://razorpay.me/@Shopprime', '_blank');
   };
 
   const handleConfirmPayment = () => {
@@ -108,19 +107,23 @@ const UPIPayment = () => {
           <div className="bg-white rounded-lg p-4 mb-4 text-center border border-gray-200">
             <p className="text-sm text-gray-600 mb-2">Your Payment Link:</p>
             <a 
-              href={`https://razorpay.me/@Shopprime?amount=${totalPrice.toFixed(2)}`}
+              href="https://razorpay.me/@Shopprime"
               target="_blank" 
               rel="noopener noreferrer"
               className="text-green-600 font-bold text-lg hover:underline break-all"
             >
               razorpay.me/@Shopprime
             </a>
-            <p className="text-xs text-gray-500 mt-2">Amount will be pre-filled</p>
+          </div>
+
+          <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4 mb-4">
+            <p className="text-center text-sm text-gray-700 mb-2">Enter this exact amount on Razorpay:</p>
+            <p className="text-center text-3xl font-bold text-green-600">₹{totalPrice.toFixed(2)}</p>
           </div>
 
           <ol className="text-sm text-gray-700 space-y-3 list-decimal list-inside bg-white rounded-lg p-4">
             <li>Click the link above or the "Pay Now" button</li>
-            <li>Enter exact amount: <strong className="text-green-600 text-lg">₹{totalPrice.toFixed(2)}</strong></li>
+            <li>Enter the amount shown above on Razorpay.me</li>
             <li>Complete payment using UPI, Card, or Net Banking</li>
             <li>Return here and click "I've Paid" below</li>
           </ol>
@@ -129,15 +132,15 @@ const UPIPayment = () => {
         {/* Pay Now Button */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <a
-            href={`https://razorpay.me/@Shopprime?amount=${totalPrice.toFixed(2)}`}
+            href="https://razorpay.me/@Shopprime"
             target="_blank"
             rel="noopener noreferrer"
             className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold hover:bg-green-700 transition-colors flex items-center justify-center gap-2 block text-center"
           >
-            Pay ₹{totalPrice.toFixed(2)} on Razorpay.me <FiExternalLink />
+            Pay on Razorpay.me <FiExternalLink />
           </a>
           <p className="text-center text-sm text-gray-500 mt-4">
-            Amount will be automatically filled
+            Enter amount: ₹{totalPrice.toFixed(2)}
           </p>
         </div>
 
