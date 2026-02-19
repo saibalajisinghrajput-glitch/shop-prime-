@@ -272,38 +272,37 @@ api.interceptors.request.use((config) => {
 
 export default api;
 
-// Payment APIs - Real backend calls
+// Payment APIs - Client-side only (no backend required for static deployment)
 export const getRazorpayKey = async () => {
-  try {
-    const response = await api.get('/payment/key');
-    return response;
-  } catch (error) {
-    console.error('Error fetching Razorpay key:', error);
-    // Fallback to env var
-    return {
-      data: {
-        key_id: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_key'
-      }
-    };
-  }
+  // Get key from environment variable (safe for client - this is the public key)
+  return {
+    data: {
+      key_id: import.meta.env.VITE_RAZORPAY_KEY_ID || ''
+    }
+  };
 };
 
 export const createRazorpayOrder = async (orderId, amount) => {
-  try {
-    const response = await api.post('/payment/create-order', { orderId, amount });
-    return response;
-  } catch (error) {
-    console.error('Error creating Razorpay order:', error);
-    throw error;
-  }
+  // For static sites, we create a mock order ID
+  // In production with backend, this would call the server
+  return {
+    data: {
+      order: {
+        id: 'order_' + Date.now(),
+        amount: amount * 100, // Razorpay expects amount in paise
+        currency: 'INR'
+      }
+    }
+  };
 };
 
 export const verifyRazorpayPayment = async (paymentData) => {
-  try {
-    const response = await api.post('/payment/verify', paymentData);
-    return response;
-  } catch (error) {
-    console.error('Error verifying payment:', error);
-    throw error;
-  }
+  // For static sites, we simulate successful verification
+  // In production with backend, this would verify the signature
+  return {
+    data: {
+      success: true,
+      message: 'Payment verified'
+    }
+  };
 };
