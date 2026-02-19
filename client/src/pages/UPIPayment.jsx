@@ -100,28 +100,42 @@ const UPIPayment = () => {
           </div>
         </div>
 
-        {/* Payment Instructions */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <h3 className="font-semibold text-gray-800 mb-4">Payment Instructions</h3>
-          <ol className="text-sm text-gray-600 space-y-2 list-decimal list-inside">
-            <li>Click the "Pay Now" button below</li>
-            <li>You will be redirected to Razorpay secure payment page</li>
-            <li>Enter amount: <strong>₹{totalPrice.toFixed(2)}</strong></li>
+        {/* Razorpay.me Link - Prominent Display */}
+        <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg shadow-sm p-6 mb-6 border-2 border-green-200">
+          <h3 className="font-bold text-gray-800 mb-4 text-center text-lg">Pay via Razorpay</h3>
+          
+          <div className="bg-white rounded-lg p-4 mb-4 text-center border border-gray-200">
+            <p className="text-sm text-gray-600 mb-2">Your Payment Link:</p>
+            <a 
+              href="https://razorpay.me/@Shopprime" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-green-600 font-bold text-lg hover:underline break-all"
+            >
+              razorpay.me/@Shopprime
+            </a>
+          </div>
+
+          <ol className="text-sm text-gray-700 space-y-3 list-decimal list-inside bg-white rounded-lg p-4">
+            <li>Click the link above or the "Pay Now" button</li>
+            <li>Enter exact amount: <strong className="text-green-600 text-lg">₹{totalPrice.toFixed(2)}</strong></li>
             <li>Complete payment using UPI, Card, or Net Banking</li>
-            <li>Return here and click "I've Paid"</li>
+            <li>Return here and click "I've Paid" below</li>
           </ol>
         </div>
 
         {/* Pay Now Button */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <button
-            onClick={handlePayment}
-            className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+          <a
+            href="https://razorpay.me/@Shopprime"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold hover:bg-green-700 transition-colors flex items-center justify-center gap-2 block text-center"
           >
-            Pay Now <FiExternalLink />
-          </button>
+            Pay Now on Razorpay.me <FiExternalLink />
+          </a>
           <p className="text-center text-sm text-gray-500 mt-4">
-            Opens Razorpay.me/@Shopprime in new tab
+            Opens your Razorpay payment page
           </p>
         </div>
 
