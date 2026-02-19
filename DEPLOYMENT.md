@@ -67,3 +67,70 @@ Monitor payments at: [dashboard.razorpay.com](https://dashboard.razorpay.com)
 - Check payment status
 - Process refunds
 - Download reports
+
+## Troubleshooting - 400 Bad Request Error
+
+If you see `400 (Bad Request)` from Razorpay, check these:
+
+### 1. Domain Whitelisting (Most Common Issue)
+Razorpay requires your domain to be whitelisted:
+
+1. Go to [Razorpay Dashboard](https://dashboard.razorpay.com)
+2. Navigate to **Settings** → **API Keys**
+3. Click on the key you're using (live or test)
+4. Add your domain to **Allowed Domains**:
+   - `https://shop-prime.vercel.app`
+   - `https://*.vercel.app` (for preview deployments)
+
+### 2. Check API Key Format
+- Live keys start with: `rzp_live_`
+- Test keys start with: `rzp_test_`
+- Make sure there's no extra whitespace or quotes
+
+### 3. Backend Deployment Issues
+The 400 error might mean the backend isn't creating the order properly:
+
+1. Check Vercel Functions logs:
+   - Go to Vercel Dashboard → Your Project → Functions
+   - Look for `/api/payment/create-order` errors
+
+2. Verify environment variables are set:
+   ```bash
+   # In Vercel dashboard, check these are set:
+   RAZORPAY_KEY_ID=rzp_live_SHrEMkovoCPgzC
+   RAZORPAY_KEY_SECRET=DHV5FyQU5o7tW4qGU3K0dUqt
+   MONGODB_URI=your_mongodb_uri
+   ```
+
+3. Test the backend directly:
+   ```bash
+   curl https://shop-prime.vercel.app/api/health
+   # Should return: {"status":"ok","message":"ShopPrime API is running"}
+   ```
+
+### 4. Quick Fix Steps
+
+1. **Whitelist domain in Razorpay** (most important!)
+2. **Redeploy after adding env vars:**
+   ```bash
+   git add .
+   git commit -m "Fix Razorpay integration"
+   git push
+   ```
+3. **Clear browser cache** and try again
+
+### 5. Alternative: Use Test Mode
+If live mode isn't working, switch to test mode:
+
+1. In Razorpay Dashboard, switch to **Test Mode**
+2. Copy test keys (start with `rzp_test_`)
+3. Update Vercel environment variables with test keys
+4. Test with these UPI IDs:
+   - `success@razorpay` - Simulates successful payment
+   - `failure@razorpay` - Simulates failed payment
+
+## Support
+
+If issues persist:
+- Razorpay Support: support@razorpay.com
+- Check [Razorpay Docs](https://razorpay.com/docs/)

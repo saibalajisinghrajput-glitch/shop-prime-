@@ -255,39 +255,55 @@ export const createReview = async (productId, reviewData) => {
   return { data: { success: true } };
 };
 
-const api = axios.create(); // Create dummy axios instance if needed elsewhere
+
+// Create axios instance for API calls
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || '',
+});
+
+// Add auth token to requests
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 export default api;
 
-// Payment APIs
+// Payment APIs - Real backend calls
 export const getRazorpayKey = async () => {
-  await delay(200);
-  return {
-    data: {
-      key_id: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_key'
-    }
-  };
+  try {
+    const response = await api.get('/payment/key');
+    return response;
+  } catch (error) {
+    console.error('Error fetching Razorpay key:', error);
+    // Fallback to env var
+    return {
+      data: {
+        key_id: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_key'
+      }
+    };
+  }
 };
 
 export const createRazorpayOrder = async (orderId, amount) => {
-  await delay(500);
-  return {
-    data: {
-      success: true,
-      order: {
-        id: 'order_' + Date.now(),
-        amount: amount * 100,
-        currency: 'INR'
-      }
-    }
-  };
+  try {
+    const response = await api.post('/payment/create-order', { orderId, amount });
+    return response;
+  } catch (error) {
+    console.error('Error creating Razorpay order:', error);
+    throw error;
+  }
 };
 
 export const verifyRazorpayPayment = async (paymentData) => {
-  await delay(500);
-  return {
-    data: {
-      success: true,
-      message: 'Payment verified'
-    }
-  };
+  try {
+    const response = await api.post('/payment/verify', paymentData);
+    return response;
+  } catch (error) {
+    console.error('Error verifying payment:', error);
+    throw error;
+  }
 };
