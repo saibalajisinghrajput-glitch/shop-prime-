@@ -128,48 +128,22 @@ const UPIPayment = () => {
           </ol>
         </div>
 
-        {/* Razorpay.me Link - For Mobile Users */}
+        {/* Mobile Users - Alternative */}
         <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg shadow-sm p-6 mb-6 border-2 border-green-200">
-          <h3 className="font-bold text-gray-800 mb-4 text-center text-lg">Or Pay via Razorpay Link</h3>
+          <h3 className="font-bold text-gray-800 mb-4 text-center text-lg">For Mobile Users</h3>
           
-          <div className="bg-white rounded-lg p-4 mb-4 text-center border border-gray-200">
-            <p className="text-sm text-gray-600 mb-2">Your Payment Link:</p>
-            <a 
-              href="https://razorpay.me/@Shopprime"
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-green-600 font-bold text-lg hover:underline break-all"
-            >
-              razorpay.me/@Shopprime
-            </a>
-          </div>
-
           <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4 mb-4">
-            <p className="text-center text-sm text-gray-700 mb-2">Enter this exact amount:</p>
+            <p className="text-center text-sm text-gray-700 mb-2">Amount to Pay:</p>
             <p className="text-center text-3xl font-bold text-green-600">₹{totalPrice.toFixed(2)}</p>
           </div>
 
           <ol className="text-sm text-gray-700 space-y-3 list-decimal list-inside bg-white rounded-lg p-4">
-            <li>Click the link above on your mobile</li>
-            <li>Enter the amount shown above</li>
-            <li>Complete payment using UPI/Card/Net Banking</li>
-            <li>Return here and click "I've Paid" below</li>
+            <li>Save the QR code image above</li>
+            <li>Open any UPI app (PhonePe, GPay, Paytm)</li>
+            <li>Scan the saved QR code</li>
+            <li>Verify amount: <strong>₹{totalPrice.toFixed(2)}</strong></li>
+            <li>Complete payment and return here</li>
           </ol>
-        </div>
-
-        {/* Pay Now Button */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <a
-            href="https://razorpay.me/@Shopprime"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full bg-green-600 text-white py-4 rounded-lg font-semibold hover:bg-green-700 transition-colors flex items-center justify-center gap-2 block text-center"
-          >
-            Pay on Razorpay.me <FiExternalLink />
-          </a>
-          <p className="text-center text-sm text-gray-500 mt-4">
-            Enter amount: ₹{totalPrice.toFixed(2)}
-          </p>
         </div>
 
         {/* Confirm Payment Button */}
